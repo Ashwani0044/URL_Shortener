@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: url_mysql_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: url_shortener
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    container_name: url_fastapi_backend
+    restart: always
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpassword@db:3306/url_shortener
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+
+  nginx:
+    build: ./frontend
+    container_name: url_nginx_proxy
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d   # <-- Mounts your custom reverse-proxy config
+    depends_on:
+      - backend
+      - db
+
+volumes:
+  mysql_data:
