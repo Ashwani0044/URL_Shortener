@@ -58,6 +58,7 @@ def redirect_to_url(short_code: str, db: Session = Depends(get_db)):
 
     # Increment click analytics counter
     url_record.clicks += 1
+    print(url_record.clicks)
     db.commit()
 
     return RedirectResponse(url=url_record.long_url, status_code=302)
