@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from .database import engine, Base, get_db
 from .models import URL
@@ -10,6 +11,20 @@ from .services.shortener import encode_base62
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Pro URL Shortener API", version="1.0.0")
+
+origins = [
+    "http://localhost:5173",  # Vite default dev server
+    "http://localhost:3000",  # Alternative React dev port
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,          # Allows specific domains
+    allow_credentials=True,         # Allows cookies / auth headers
+    allow_methods=["*"],            # Allows all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],            # Allows all headers
+)
+
 
 @app.post("/api/shorten", response_model=URLResponse, status_code=status.HTTP_201_CREATED)
 def shorten_url(payload: URLCreate, db: Session = Depends(get_db)):
