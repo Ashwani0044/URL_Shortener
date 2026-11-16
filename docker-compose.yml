@@ -7,20 +7,29 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: url_shortener
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: Root@1234
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build: ./backend
     container_name: url_fastapi_backend
     restart: always
     environment:
-      - DATABASE_URL=mysql+pymysql://root:rootpassword@db:3306/url_shortener
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=Root@1234
+      - DB_NAME=url_shortener
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8000:8000"
 
@@ -31,7 +40,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d   # <-- Mounts your custom reverse-proxy config
+      - ./nginx/conf.d:/etc/nginx/conf.d   # Mounts custom reverse-proxy config
     depends_on:
       - backend
       - db

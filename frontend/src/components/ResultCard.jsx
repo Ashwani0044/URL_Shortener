@@ -3,7 +3,7 @@ import '../styles/ResultCard.css';
 
 export default function ResultCard({ result }) {
   const [copied, setCopied] = useState(false);
-  const shortUrl = `http://😊/${result.short_code}`;
+  const shortUrl = `${window.location.origin}/${result.short_code}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shortUrl);
