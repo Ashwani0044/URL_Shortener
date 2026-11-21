@@ -49,6 +49,17 @@ def shorten_url(payload: URLCreate, db: Session = Depends(get_db)):
 
     return new_url
 
+
+
+@app.get("/api/urls/{short_code}", response_model=URLResponse)
+def get_url_status(short_code: str, db: Session = Depends(get_db)):
+    db_url = db.query(URL).filter(URL.short_code == short_code).first()
+
+    if not db_url:
+        raise HTTPException(status_code=404, detail="Short URL not found")
+    return db_url
+
+
 @app.get("/{short_code}")
 def redirect_to_url(short_code: str, db: Session = Depends(get_db)):
     url_record = db.query(URL).filter(URL.short_code == short_code).first()
@@ -58,7 +69,6 @@ def redirect_to_url(short_code: str, db: Session = Depends(get_db)):
 
     # Increment click analytics counter
     url_record.clicks += 1
-    print(url_record.clicks)
     db.commit()
 
     return RedirectResponse(url=url_record.long_url, status_code=302)
