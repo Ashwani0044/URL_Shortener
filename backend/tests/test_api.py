@@ -13,7 +13,7 @@ def test_shorten_and_redirect_flow():
     # 1. Test creating a short URL
     target_url = "https://github.com/Ashwani0044"
     response = client.post("/api/shorten", json={"long_url": target_url})
-    assert response.status_code == 200
+    assert response.status_code == 201
 
     data = response.json()
     assert "short_code" in data
